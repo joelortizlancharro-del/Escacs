@@ -1,9 +1,13 @@
 import java.util.Scanner;
 
 public class escacs {
-
+    boolean movimentIlegal = false;
     char[][] taulell;
     int torn = 0;
+    int filaOrigen;
+    int columnaOrigen;
+    int filaDesti;
+    int columnaDesti;
     Scanner escaner = new Scanner(System.in);
     public static void main(String[] args) {
          escacs p = new escacs();
@@ -11,7 +15,6 @@ public class escacs {
       }
 
   public void principal(){
-    boolean movimentIlegal = false;
     String jugadorBlanc;
     String jugadorNegre;
     
@@ -100,31 +103,130 @@ public class escacs {
 
   public void jugar(String[] jugadors, char[][] taulell){
    moviment();  
+   if(movimentIlegal == false){
+     retornTaulell(taulell, columnaOrigen, columnaDesti, filaDesti, filaOrigen);
+    }
   }
 
-    public void peons(char[][] taulell, int filaOrigen, int columnaOrigen, int filaDesti, int columnaDesti){
+    public boolean peons(char[][] taulell, int filaOrigen, int columnaOrigen, int filaDesti, int columnaDesti){
+      movimentIlegal = false;
      int movimentVerticalPeo = filaOrigen - filaDesti;
      int movimentIlegalNegresPeo = filaDesti - filaOrigen;
      int movimentIlegalBlanquesPeo = filaDesti - filaOrigen;
 
             if( ((movimentVerticalPeo > 1 || movimentVerticalPeo < -1) && (filaOrigen != 1 && filaOrigen != 6)) || ((filaOrigen != 1 || filaOrigen != 6) && (movimentVerticalPeo > 2 || movimentVerticalPeo < -2)) || ((taulell[filaOrigen][columnaOrigen] == 'p' && movimentIlegalNegresPeo < 0) || (taulell[filaOrigen][columnaOrigen] == 'P' && movimentIlegalBlanquesPeo > 0))){
-                System.out.println("MOVIMENT ILEGAL, HAS INTRODUIT UNA FILA INCORRECTE \n Torna a intrduir el moviment ");
-                moviment();
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
             }
            
-            
             if( (((columnaDesti != columnaOrigen)) || ((columnaDesti != columnaOrigen) && (columnaOrigen - columnaDesti) > 1) || ((columnaDesti != columnaOrigen) && (columnaOrigen - columnaDesti) < -1)) && ((taulell[filaOrigen][columnaOrigen] == 'p' && taulell[filaDesti][columnaDesti] == '.') || (taulell[filaOrigen][columnaOrigen] == 'P' && taulell[filaDesti][columnaDesti] == '.'))){ //completar cuando hayan varios movimentos
-               System.out.println("MOVIMENT ILEGAL, HAS INTRODUIT UNA FILA INCORRECTE \n Torna a intrduir el moviment ");
-                moviment();
-              
+               System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
             }
-
-              retornTaulell(taulell,  columnaOrigen,  columnaDesti,  filaDesti,  filaOrigen);
-         
-            
-    
+            if(columnaDesti == columnaOrigen && filaDesti != filaOrigen && taulell[filaDesti][columnaDesti] != '.'){ //no menjar en vertical
+               System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+            }
+            if(filaOrigen != filaDesti && columnaOrigen != columnaDesti && taulell[filaDesti][columnaDesti] == '.'){ //si es diferent fila i diferent columna no fer moviment
+              System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+            }
+            if( columnaOrigen != columnaDesti && filaDesti == filaOrigen && taulell[filaDesti][columnaDesti] != '.'){ // no menjar en horitzontal
+              System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+            }
+            if(taulell[filaDesti][columnaDesti] != '.' && ((columnaOrigen - columnaDesti) > 1 || (columnaDesti - columnaOrigen) < -1)){ //control que no es poggui menjar mes de una vegada al costst
+               System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+            }
+            if(filaDesti - filaOrigen == 2){
+              for(int i = filaOrigen + 1; i < filaDesti; i++){
+                if(taulell[i][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+                }
+              }
+            }
+            if(filaDesti - filaOrigen == -2){
+              for(int i = filaDesti + 1; i < filaOrigen; i++){
+                if(taulell[i][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+                }
+              }
+            }
+     return movimentIlegal;
   }
-    
+   
+    public boolean torre(char[][] taulell){
+      movimentIlegal = false;   
+
+          if(filaOrigen != filaDesti && columnaOrigen != columnaDesti){ //mirar que el moviment sigui unicament vertical o horitzontal
+            System.out.println("MOVIMENT ILEGAL!!!");
+                  movimentIlegal = true;
+              }
+
+          if(filaDesti > filaOrigen && columnaDesti == columnaOrigen){ //Moviment vertical positiu
+            for(int i = filaOrigen + 1; i < filaDesti; i++){
+                  if(taulell[i][columnaOrigen] !='.'){
+                      movimentIlegal = true;
+                      System.out.println("MOVIMENT ILEGAL!!!");
+                      return movimentIlegal;
+              }
+            }
+          }
+          if(filaDesti < filaOrigen && columnaDesti == columnaOrigen){ //moviment vertical negatiu
+            for(int i = filaDesti + 1; i < filaOrigen; i++){
+                  if(taulell[i][columnaOrigen] !='.'){
+                      movimentIlegal = true;
+                      System.out.println("MOVIMENT ILEGAL!!!");
+                      return movimentIlegal;
+              }
+            }
+          }
+          if(columnaDesti > columnaOrigen && filaDesti == filaOrigen){ //moviment horitzontal positiu
+            for(int i = columnaOrigen + 1; i < columnaDesti; i++){
+                  if(taulell[filaDesti][i] !='.'){
+                      movimentIlegal = true;
+                      System.out.println("MOVIMENT ILEGAL!!!");
+                      return movimentIlegal;
+              }
+            }
+          }
+          if(columnaDesti < columnaOrigen && filaDesti == filaOrigen){ //moviment horitzontal negatiu
+            for(int i = columnaDesti + 1; i < columnaOrigen; i++){
+                  if(taulell[filaDesti][i] !='.'){
+                      movimentIlegal = true;
+                      System.out.println("MOVIMENT ILEGAL!!!");
+                      return movimentIlegal;
+              }
+            }
+          }
+             if(taulell[filaOrigen][columnaOrigen] == 't' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+              else if(taulell[filaOrigen][columnaOrigen] == 'T' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+             
+              return movimentIlegal;
+            
+            
+    }
+
    public char[][] retornTaulell(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
        taulell[filaDesti][columnaDesti] = taulell[filaOrigen][columnaOrigen] ;
       taulell[filaOrigen][columnaOrigen]='.';
@@ -147,11 +249,11 @@ public class escacs {
         }
       }
    
-   int columnaOrigen = parts[0].charAt(0) - 'a';
-    int filaOrigen = parts[0].charAt(1) - '1';
+    columnaOrigen = parts[0].charAt(0) - 'a';
+    filaOrigen = parts[0].charAt(1) - '1';
 
-    int columnaDesti = parts[1].charAt(0) - 'a';
-    int filaDesti = parts[1].charAt(1) - '1';
+    columnaDesti = parts[1].charAt(0) - 'a';
+    filaDesti = parts[1].charAt(1) - '1';
      
     while ((columnaOrigen < 0 || columnaOrigen > 7) || (columnaDesti < 0 || columnaDesti > 7) || (filaOrigen < 0 || filaOrigen > 7) || (filaDesti < 0 || filaDesti > 7)){
         if((columnaOrigen < 0 || columnaOrigen > 7) || (columnaDesti < 0 || columnaDesti > 7) || (filaOrigen < 0 || filaOrigen > 7) || (filaDesti < 0 || filaDesti > 7)){
@@ -171,20 +273,26 @@ public class escacs {
    }
   
   public void escollirMoviment(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
-        if(taulell[filaOrigen][columnaOrigen] == 'P' || taulell[filaOrigen][columnaOrigen] == 'p'){
-        peons(taulell, filaOrigen, columnaOrigen, filaDesti, columnaDesti);
+    if(taulell[filaOrigen][columnaOrigen] == 'P' || taulell[filaOrigen][columnaOrigen] == 'p'){
+      peons(taulell, filaOrigen, columnaOrigen, filaDesti, columnaDesti);
+    }
+    else if(taulell[filaOrigen][columnaOrigen] == 'T' || taulell[filaOrigen][columnaOrigen] == 't'){
+      torre(taulell);
     }
   }
   
  public void controlTorns(){
-    if(torn == 0){
-    System.out.println("Torn de les blanques.");
-    torn = 1;
-  }
-  else if(torn == 1){
-    System.out.println("Torn de les negres.");
-    torn = 0;
-  }
+   if (movimentIlegal == false) {
+      if(torn == 0){
+      System.out.println("Torn de les blanques.");
+      torn = 1;
+    }
+    else if(torn == 1){
+      System.out.println("Torn de les negres.");
+      torn = 0;
+    }
+   } 
+  
  }
 }
 
