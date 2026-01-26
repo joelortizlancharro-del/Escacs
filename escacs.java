@@ -145,7 +145,7 @@ public class escacs {
                 movimentIlegal = true;
                 return movimentIlegal;
             }
-            if(filaDesti - filaOrigen == 2){
+            if(filaDesti - filaOrigen == 2){ //control de no peces en mig quan fem el primer moviment i son dos
               for(int i = filaOrigen + 1; i < filaDesti; i++){
                 if(taulell[i][columnaDesti] != '.'){
                   System.out.println("MOVIMENT ILEGAL!!!");
@@ -154,7 +154,7 @@ public class escacs {
                 }
               }
             }
-            if(filaDesti - filaOrigen == -2){
+            if(filaDesti - filaOrigen == -2){ //control de no peces en mig quan fem el primer moviment i son dos
               for(int i = filaDesti + 1; i < filaOrigen; i++){
                 if(taulell[i][columnaDesti] != '.'){
                   System.out.println("MOVIMENT ILEGAL!!!");
@@ -172,6 +172,7 @@ public class escacs {
           if(filaOrigen != filaDesti && columnaOrigen != columnaDesti){ //mirar que el moviment sigui unicament vertical o horitzontal
             System.out.println("MOVIMENT ILEGAL!!!");
                   movimentIlegal = true;
+                  return movimentIlegal;
               }
 
           if(filaDesti > filaOrigen && columnaDesti == columnaOrigen){ //Moviment vertical positiu
@@ -227,6 +228,36 @@ public class escacs {
             
     }
 
+    public boolean cavall(char[][] taulell){
+      movimentIlegal = true;
+      int filaMoviment = filaDesti - filaOrigen;
+      int columnaMoviment = columnaDesti - columnaOrigen;
+      
+       if(taulell[filaOrigen][columnaOrigen] == 'c' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+        System.out.println("MOVIMENT ILEGAL!!!");
+        movimentIlegal = true;
+        return movimentIlegal;
+       }
+       else if(taulell[filaOrigen][columnaOrigen] == 'C' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+        System.out.println("MOVIMENT ILEGAL!!!");
+        movimentIlegal = true;
+        return movimentIlegal;
+       }
+       
+       if((filaMoviment == 1 && (columnaMoviment == 2 || columnaMoviment == -2)) ||
+          (filaMoviment == -1 && (columnaMoviment == 2 || columnaMoviment == -2))||
+          (filaMoviment == 2 && (columnaMoviment == 1 || columnaMoviment == -1))||
+          (filaMoviment == -2 && (columnaMoviment == 1 || columnaMoviment == -1))){
+            movimentIlegal = false;
+            return movimentIlegal;
+       }
+       else{
+        System.out.println("MOVIMENT ILEGAL!!!");
+        movimentIlegal = true;
+        return movimentIlegal;
+       }
+    }
+
    public char[][] retornTaulell(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
        taulell[filaDesti][columnaDesti] = taulell[filaOrigen][columnaOrigen] ;
       taulell[filaOrigen][columnaOrigen]='.';
@@ -278,6 +309,9 @@ public class escacs {
     }
     else if(taulell[filaOrigen][columnaOrigen] == 'T' || taulell[filaOrigen][columnaOrigen] == 't'){
       torre(taulell);
+    }
+    else if(taulell[filaOrigen][columnaOrigen] == 'C' || taulell[filaOrigen][columnaOrigen] == 'c'){
+      cavall(taulell);
     }
   }
   
