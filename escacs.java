@@ -8,6 +8,7 @@ public class escacs {
     int columnaOrigen;
     int filaDesti;
     int columnaDesti;
+    int contador = 0;
     Scanner escaner = new Scanner(System.in);
     public static void main(String[] args) {
          escacs p = new escacs();
@@ -24,14 +25,15 @@ public class escacs {
     taulell = crearTaulell(taulell);
 
     jugadors = creacioDeJugadors(jugadors);
-  
+
+      mostrarTaulell(taulell);
   while(taulell[7][4] == 'K'){
-    controlTorns();
-     jugar(jugadors, taulell);
+      controlTorns();
+      jugar(jugadors, taulell);
       mostrarTaulell(taulell);
   }
   
-      mostrarTaulell(taulell);
+      
 
   }
  
@@ -108,7 +110,7 @@ public class escacs {
     }
   }
 
-    public boolean peons(char[][] taulell, int filaOrigen, int columnaOrigen, int filaDesti, int columnaDesti){
+  public boolean peons(char[][] taulell, int filaOrigen, int columnaOrigen, int filaDesti, int columnaDesti){
       movimentIlegal = false;
      int movimentVerticalPeo = filaOrigen - filaDesti;
      int movimentIlegalNegresPeo = filaDesti - filaOrigen;
@@ -165,8 +167,8 @@ public class escacs {
             }
      return movimentIlegal;
   }
-   
-    public boolean torre(char[][] taulell){
+ 
+  public boolean torre(char[][] taulell){
       movimentIlegal = false;   
 
           if(filaOrigen != filaDesti && columnaOrigen != columnaDesti){ //mirar que el moviment sigui unicament vertical o horitzontal
@@ -222,13 +224,16 @@ public class escacs {
                 movimentIlegal = true;
                 return movimentIlegal;
               }
+              if(movimentIlegal == false){
+                contador++;
+              }
              
               return movimentIlegal;
             
             
     }
 
-    public boolean cavall(char[][] taulell){
+  public boolean cavall(char[][] taulell){
       movimentIlegal = true;
       int filaMoviment = filaDesti - filaOrigen;
       int columnaMoviment = columnaDesti - columnaOrigen;
@@ -258,14 +263,88 @@ public class escacs {
        }
     }
 
-   public char[][] retornTaulell(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
+  public boolean alfil(char[][] taulell){
+    movimentIlegal = false;
+    int movimentVerticalAlfil;
+    int movimentHoritzontalAlfil;
+
+   if(filaDesti > filaOrigen){
+    movimentVerticalAlfil = 1; 
+   }
+   else{
+    movimentVerticalAlfil = -1;
+   }
+
+   if(columnaDesti > columnaOrigen){
+      movimentHoritzontalAlfil = 1;
+   }
+   else{
+    movimentHoritzontalAlfil = -1;
+   }
+
+   int fil = filaOrigen + movimentVerticalAlfil;
+   int col = columnaOrigen + movimentHoritzontalAlfil;
+
+    if(!(filaDesti-filaOrigen == columnaDesti-columnaOrigen || 
+      filaDesti-filaOrigen == columnaOrigen-columnaDesti || 
+      filaOrigen-filaDesti == columnaOrigen-columnaDesti || 
+      filaOrigen-filaDesti == columnaDesti-columnaOrigen)){
+      System.out.println("MOVIMENT ILEGAL!!!");
+        movimentIlegal = true;
+        return movimentIlegal;
+    }
+
+     if(taulell[filaOrigen][columnaOrigen] == 'a' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+              else if(taulell[filaOrigen][columnaOrigen] == 'A' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                  movimentIlegal = true;
+                  return movimentIlegal;
+              }
+        //cambiar aixo
+         while(fil != filaDesti && col != columnaDesti){
+          if(taulell[fil][col] != '.'){
+            System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+          }
+          fil = fil+movimentVerticalAlfil;
+          col = col+movimentHoritzontalAlfil;
+         }
+         if(movimentIlegal == false){
+                contador++;
+              }
+             
+    return movimentIlegal;
+  }
+
+  public boolean reina(char[][] taulell){
+        
+    if(taulell[filaOrigen][columnaOrigen] == 'q' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+              else if(taulell[filaOrigen][columnaOrigen] == 'Q' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                  movimentIlegal = true;
+                  return movimentIlegal;
+              }
+
+       return alfil(taulell) && torre(taulell);
+  }
+
+  public char[][] retornTaulell(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
        taulell[filaDesti][columnaDesti] = taulell[filaOrigen][columnaOrigen] ;
       taulell[filaOrigen][columnaOrigen]='.';
 
       return taulell;
    }
 
-   public void moviment(){
+  public void moviment(){
     String movimentPeces;
       
     System.out.println("Quina es la peça que vols moure? Ex: e2 e4");
@@ -313,9 +392,15 @@ public class escacs {
     else if(taulell[filaOrigen][columnaOrigen] == 'C' || taulell[filaOrigen][columnaOrigen] == 'c'){
       cavall(taulell);
     }
+    else if(taulell[filaOrigen][columnaOrigen] == 'A' || taulell[filaOrigen][columnaOrigen] == 'a'){
+      alfil(taulell);
+    }
+    else if(taulell[filaOrigen][columnaOrigen] == 'Q' || taulell[filaOrigen][columnaOrigen] == 'q'){
+      reina(taulell);
+    }
   }
   
- public void controlTorns(){
+  public void controlTorns(){
    if (movimentIlegal == false) {
       if(torn == 0){
       System.out.println("Torn de les blanques.");
@@ -328,6 +413,22 @@ public class escacs {
    } 
   
  }
+
+ public void passar(){
+  int contador = 0;
+   for(int i = 0; i < 8; i++){
+    for(int j = 0; j < 8; j++){
+      if(taulell[i][j] == 'k' || 'K'{
+        contador ++;
+      })
+      
+    }
+   }
+   while(contador == 2){
+
+   }
+ }
+   
 }
 
  
