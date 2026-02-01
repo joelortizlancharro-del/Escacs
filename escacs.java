@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class escacs {
@@ -9,6 +10,9 @@ public class escacs {
     int filaDesti;
     int columnaDesti;
     int contador = 0;
+    boolean tirarToballola = false;
+    String movimentPeces;
+  
     Scanner escaner = new Scanner(System.in);
     public static void main(String[] args) {
          escacs p = new escacs();
@@ -21,20 +25,45 @@ public class escacs {
     
     taulell = new char[8][8];
     String[] jugadors = new String[2];
+    ArrayList<String> movimentsBlanques = new ArrayList<>();
+    ArrayList<String> movimentsNegres = new ArrayList<>();
 
     taulell = crearTaulell(taulell);
 
     jugadors = creacioDeJugadors(jugadors);
 
       mostrarTaulell(taulell);
-  while(taulell[7][4] == 'K'){
+      contarReis(taulell, jugadors);
+  while(contador == 2){
       controlTorns();
-      jugar(jugadors, taulell);
-      mostrarTaulell(taulell);
-  }
-  
-      
-
+      rendirse(taulell, jugadors);
+      if(tirarToballola == false && contador == 2){
+        
+          jugar(jugadors, taulell, movimentsBlanques, movimentsNegres);
+          mostrarTaulell(taulell);
+          if(movimentIlegal == false){
+            if(torn == 0){
+            torn = 1;
+          }
+          else if(torn == 1){
+            torn = 0;
+          }
+          }
+          contador = 0;
+          contarReis(taulell, jugadors);
+        if(contador != 2 && tirarToballola == false){
+            System.out.println("La partida ha acabat!!! ");
+        if(torn == 0){
+            System.out.println("EL GUANYADOR ES:" + jugadors[1]);
+        }
+        else{
+            System.out.println("EL GUANYADOR ES:" + jugadors[0]);
+        }
+      }
+      }
+   }
+     mostrarMoviments(movimentsBlanques, movimentsNegres);
+    //tornarAJugar(jugadors, movimentsBlanques, movimentsNegres);
   }
  
   public char[][] crearTaulell(char[][] taulell){
@@ -103,11 +132,14 @@ public class escacs {
     return jugadors;
   }
 
-  public void jugar(String[] jugadors, char[][] taulell){
+  public void jugar(String[] jugadors, char[][] taulell,ArrayList<String> movimentsBlanques, ArrayList<String> movimentsNegres){
+    
    moviment();  
    if(movimentIlegal == false){
      retornTaulell(taulell, columnaOrigen, columnaDesti, filaDesti, filaOrigen);
+     imprimirMoviments(movimentsBlanques, movimentsNegres, movimentPeces);
     }
+
   }
 
   public boolean peons(char[][] taulell, int filaOrigen, int columnaOrigen, int filaDesti, int columnaDesti){
@@ -165,6 +197,17 @@ public class escacs {
                 }
               }
             }
+             if(taulell[filaOrigen][columnaOrigen] == 'p' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+              else if(taulell[filaOrigen][columnaOrigen] == 'P' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                  movimentIlegal = true;
+                  return movimentIlegal;
+              }
+            
      return movimentIlegal;
   }
  
@@ -223,9 +266,6 @@ public class escacs {
                 
                 movimentIlegal = true;
                 return movimentIlegal;
-              }
-              if(movimentIlegal == false){
-                contador++;
               }
              
               return movimentIlegal;
@@ -314,9 +354,7 @@ public class escacs {
           fil = fil+movimentVerticalAlfil;
           col = col+movimentHoritzontalAlfil;
          }
-         if(movimentIlegal == false){
-                contador++;
-              }
+
              
     return movimentIlegal;
   }
@@ -337,6 +375,31 @@ public class escacs {
        return alfil(taulell) && torre(taulell);
   }
 
+  public boolean rei(char[][] taulell){
+    movimentIlegal = false;
+
+    if(filaDesti - filaOrigen < 1 ||
+      filaDesti - filaOrigen > -1  ||
+      columnaDesti - columnaOrigen > 1 || 
+      columnaDesti - columnaOrigen < -1){
+         System.out.println("MOVIMENT ILEGAL!!!");
+         movimentIlegal = true;
+         return movimentIlegal;
+      }
+
+      if(taulell[filaOrigen][columnaOrigen] == 'k' && !Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                System.out.println("MOVIMENT ILEGAL!!!");
+                movimentIlegal = true;
+                return movimentIlegal;
+              }
+              else if(taulell[filaOrigen][columnaOrigen] == 'K' && Character.isUpperCase(taulell[filaDesti][columnaDesti]) && taulell[filaDesti][columnaDesti] != '.'){
+                  System.out.println("MOVIMENT ILEGAL!!!");
+                  movimentIlegal = true;
+                  return movimentIlegal;
+              }
+      return movimentIlegal;
+  }
+
   public char[][] retornTaulell(char[][] taulell, int columnaOrigen, int columnaDesti, int filaDesti, int filaOrigen){
        taulell[filaDesti][columnaDesti] = taulell[filaOrigen][columnaOrigen] ;
       taulell[filaOrigen][columnaOrigen]='.';
@@ -345,8 +408,7 @@ public class escacs {
    }
 
   public void moviment(){
-    String movimentPeces;
-      
+      escaner.nextLine();
     System.out.println("Quina es la peça que vols moure? Ex: e2 e4");
     movimentPeces = escaner.nextLine();
     
@@ -377,8 +439,11 @@ public class escacs {
                 filaDesti = parts[1].charAt(1) - '1';
           }
       }
-   
-    escollirMoviment(taulell, columnaOrigen, columnaDesti, filaDesti, filaOrigen);
+    controlsBasics(taulell);
+    if(movimentIlegal == false){
+      escollirMoviment(taulell, columnaOrigen, columnaDesti, filaDesti, filaOrigen);
+    }
+    
 
    }
   
@@ -398,37 +463,221 @@ public class escacs {
     else if(taulell[filaOrigen][columnaOrigen] == 'Q' || taulell[filaOrigen][columnaOrigen] == 'q'){
       reina(taulell);
     }
+    else if(taulell[filaOrigen][columnaOrigen] == 'K' || taulell[filaOrigen][columnaOrigen] == 'k'){
+      rei(taulell);
+    }
   }
   
   public void controlTorns(){
-   if (movimentIlegal == false) {
       if(torn == 0){
       System.out.println("Torn de les blanques.");
-      torn = 1;
     }
     else if(torn == 1){
       System.out.println("Torn de les negres.");
-      torn = 0;
     }
-   } 
-  
  }
 
- public void passar(){
-  int contador = 0;
+ public boolean controlsBasics(char[][] taulell){
+  movimentIlegal = false;
+  if((taulell[filaOrigen][columnaOrigen] == 'p' || taulell[filaOrigen][columnaOrigen] == 't' || taulell[filaOrigen][columnaOrigen] == 'c' || taulell[filaOrigen][columnaOrigen] == 'a' || taulell[filaOrigen][columnaOrigen] == 'q' || taulell[filaOrigen][columnaOrigen] == 'k') && torn == 0){
+    System.out.println("NOMES POTS MOURE PECES DEL TEU COLOR!!!");
+    movimentIlegal = true;
+    return movimentIlegal;
+  }
+  if((taulell[filaOrigen][columnaOrigen] == 'P' || taulell[filaOrigen][columnaOrigen] == 'T' || taulell[filaOrigen][columnaOrigen] == 'C' || taulell[filaOrigen][columnaOrigen] == 'A' || taulell[filaOrigen][columnaOrigen] == 'Q' || taulell[filaOrigen][columnaOrigen] == 'K') && torn == 1){
+    System.out.println("NOMES POTS MOURE PECES DEL TEU COLOR!!!");
+    movimentIlegal = true;
+    return movimentIlegal;
+  }
+  if(taulell[filaOrigen][columnaOrigen] == taulell[filaDesti][columnaDesti]){
+    System.out.println("NO POTS MOURE LA PEÇA AL MATEIX LLOC ON ESTAVA!!!");
+    movimentIlegal = true;
+    return movimentIlegal;
+  }
+  if(taulell[filaOrigen][columnaOrigen] == '.'){
+    System.out.println("NO HAS SELECCIONAT CAP PEÇA!!!");
+    movimentIlegal = true;
+    return movimentIlegal;
+  }
+  return movimentIlegal;
+ }
+
+ public void contarReis(char[][] taulell, String[] jugadors){
    for(int i = 0; i < 8; i++){
     for(int j = 0; j < 8; j++){
-      if(taulell[i][j] == 'k' || 'K'{
+      if(taulell[i][j] == 'k' || taulell[i][j] == 'K'){
         contador ++;
-      })
-      
+      }
     }
-   }
-   while(contador == 2){
-
    }
  }
    
+ public boolean rendirse(char[][] taulell, String[] jugadors){
+  int rendicio;
+  System.out.println("Vols rendirte? \n1.No \n2.Si ");
+  rendicio = controlErrorsInt();
+  while(rendicio != 1 && rendicio != 2){
+    System.out.println("Ha de ser el numero 1 o el 2.");
+    rendicio = controlErrorsInt();
+  }
+  if(rendicio == 1){
+    tirarToballola = false;
+  }
+  else{
+    tirarToballola = true;
+    if(torn == 0){
+      for(int i = 0; i < 8; i++){
+        for(int j= 0; j < 8; j++){
+          if(taulell[i][j] == 'K'){
+            taulell[i][j] = '.';
+            System.out.println("EL GUANYADOR ES:" + jugadors[1]);
+            contarReis(taulell, jugadors);
+            return tirarToballola;
+          }
+        }
+      }
+    }
+    else if(torn == 1){
+      tirarToballola = true;
+      for(int i = 0; i < 8; i++){
+        for(int j= 0; j < 8; j++){
+          if(taulell[i][j] == 'k'){
+            taulell[i][j] = '.';
+            System.out.println("EL GUANYADOR ES:" + jugadors[0]);
+            contarReis(taulell, jugadors);
+            return tirarToballola;
+          }
+        }
+      }
+    }
+  }
+  return tirarToballola;
+ }
+
+ public void imprimirMoviments(ArrayList<String> movimentsBlanques, ArrayList<String> movimentsNegres, String movimentPeces){
+   if(torn == 0){
+    movimentsBlanques.add(movimentPeces);
+   }
+   else{
+    movimentsNegres.add(movimentPeces);
+   }
+ }
+
+ public void mostrarMoviments(ArrayList<String> movimentsBlanques, ArrayList<String> movimentsNegres){
+  int veureMoviments;
+  System.out.println("Vols veure els moviments de la partida? \n1.No \n2.Si");
+  veureMoviments = controlErrorsInt();
+    while(veureMoviments != 1 && veureMoviments != 2){
+    System.out.println("Ha de ser el numero 1 o el 2.");
+    veureMoviments = controlErrorsInt();
+ }
+ if(veureMoviments == 2){
+  System.out.println("El moviment de les blanques es: ");
+  for(int i = 0; i < movimentsBlanques.size(); i++){
+    System.out.println( "Moviment " + (i+1) + ": " + movimentsBlanques.get(i));
+  }
+  System.out.println("El moviment de les negres es: ");
+  for(int i = 0; i < movimentsNegres.size(); i++){
+    System.out.println( "Moviment " + (i+1) + ": " + movimentsNegres.get(i));
+  }
+ }
 }
 
+ public void tornarAJugar(String[] jugadors, ArrayList<String> movimentsBlanques, ArrayList<String> movimentsNegres){
+  int tornarJoc;
+  int mateixosJugadors;
+  System.out.println("Voleu tornar a jugar? \n 1.Si \n 2.No");
+  tornarJoc = controlErrorsInt();
+  while(tornarJoc != 1 && tornarJoc != 2){
+    System.out.println("Ha de ser el numero 1 o el 2.");
+    tornarJoc = controlErrorsInt();
+  }
+  if(tornarJoc == 2){
+    System.out.println("Espero que us ho hagueu passat be!!! \nFins aviat!!!");
+    System.exit(0);
+  }
+  else if(tornarJoc == 1){
+        System.out.println("Sou els mateixos jugadors? \n 1.Si \n 2.No");
+        mateixosJugadors = controlErrorsInt();
+     while(mateixosJugadors != 1 && mateixosJugadors != 2){
+        System.out.println("Ha de ser el numero 1 o el 2.");
+        mateixosJugadors = controlErrorsInt();
+      }
+      if(mateixosJugadors == 2){
+        escaner.nextLine();
+         creacioDeJugadors(jugadors);
+      }
+      else if(mateixosJugadors == 1){
+        if(torn == 0 && tirarToballola == true){
+          jugadors[0] = jugadors[1];
+        }
+        else if(torn == 1 && tirarToballola == true){
+          jugadors[0] = jugadors[0];
+        }
+        else if(torn == 0 && tirarToballola == false){
+          jugadors[0] = jugadors[0];
+        }
+        else if(torn == 1 && tirarToballola == false){
+          jugadors[0] = jugadors[1];
+        }
+      }
+   
+   }
+
+ }
+
+ public void retornarAlJoc(String[] jugadors,ArrayList<String> movimentsBlanques, ArrayList<String> movimentsNegres){
+   taulell = new char[8][8];
+  taulell = crearTaulell(taulell);
+        mostrarTaulell(taulell);
+        contador = 0;
+        tirarToballola = false;
+      contarReis(taulell, jugadors);
+  while(contador == 2){
+      controlTorns();
+      rendirse(taulell, jugadors);
+      if(contador != 2 && tirarToballola == false){
+        System.out.println("La partida ha acabat!!! ");
+        if(torn == 0){
+            System.out.println("EL GUANYADOR ES:" + jugadors[1]);
+        }
+        else{
+            System.out.println("EL GUANYADOR ES:" + jugadors[0]);
+        }
+      }
+     
+      if(tirarToballola == false && contador == 2){
+        
+          jugar(jugadors, taulell, movimentsBlanques, movimentsNegres);
+          mostrarTaulell(taulell);
+          if(torn == 0){
+            torn = 1;
+          }
+          else if(torn == 1){
+            torn = 0;
+          }
+          contador = 0;
+          contarReis(taulell, jugadors);
+      }
+   }
+    mostrarMoviments(movimentsBlanques, movimentsNegres);
+    tornarAJugar(jugadors, movimentsBlanques, movimentsNegres);
+
+ }
+
+ public int controlErrorsInt(){
+  int numero = 0;
+  while(numero == 0){
+     try{
+        numero = escaner.nextInt();
+      }
+      catch (Exception InputMismatchException) {
+        System.out.println("Ha de ser un numero!!!");
+        numero = 0;
+        escaner.nextLine();
+      }
+    }
+    return numero;
+  }
+}
  
